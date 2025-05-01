@@ -201,18 +201,34 @@
       const requiredInvestment = calculateRequiredInvestment(monthlyTransfer, months, monthlyLiquidRate);
       const inflationAdjusted = initialInvestment * Math.pow(1 + 0.06, months / 12);
 
-      document.getElementById('result').innerHTML = `
-        <strong>Results after ${months} months:</strong><br>
-        💰 Final Liquid Fund Balance: ₹${liquidFund.toFixed(2)}<br>
-        💸 Total Interest Earned from Liquid Fund: ₹${interestEarned.toFixed(2)}<br>
-        💳 Final SIP Value: ₹${sipValue.toFixed(2)}<br>
-        💰 SIP Invested: ₹${totalInvested.toFixed(2)}<br>
-        💵 SIP Gain: ₹${sipGain.toFixed(2)}<br>
-        💡 Based on ₹${monthlyTransfer} SIP, your liquid fund can sustain for approximately ${monthsAvailable} months at ${(liquidReturn * 100).toFixed(2)}% annual return.<br>
-        💡 To sustain a ₹${monthlyTransfer} SIP for ${months} months at ${(liquidReturn * 100).toFixed(2)}% annual return, you would need an initial investment of approximately ₹${requiredInvestment.toFixed(0)}.<br>
-        📉 Due to 6% annual inflation, ₹${initialInvestment.toFixed(0)} today will be equivalent to ₹${inflationAdjusted.toFixed(0)} after ${months} months.<br>
-        🌐 <strong>Total Portfolio Value: ₹${totalValue.toFixed(2)}</strong>
-      `;
+document.getElementById('result').innerHTML = `
+  <h3>✅ STP Calculation Summary (After ${months} Months)</h3>
+
+  <h4>🏦 Liquid Fund Performance</h4>
+  <ul>
+    <li><strong>Final Balance:</strong> ₹${liquidFund.toFixed(2)}</li>
+    <li><strong>Total Interest Earned:</strong> ₹${interestEarned.toFixed(2)}</li>
+  </ul>
+
+  <h4>📈 SIP Performance</h4>
+  <ul>
+    <li><strong>Total Invested via SIP:</strong> ₹${totalInvested.toFixed(2)}</li>
+    <li><strong>Final SIP Value:</strong> ₹${sipValue.toFixed(2)}</li>
+    <li><strong>SIP Gain:</strong> ₹${sipGain.toFixed(2)}</li>
+  </ul>
+
+  <h4>🔍 Strategic Insights</h4>
+  <ul>
+    <li>💡 Your ₹${monthlyTransfer} SIP can be sustained for <strong>${monthsAvailable} months</strong> at <strong>${(liquidReturn * 100).toFixed(2)}%</strong> annual return.</li>
+    <li>💡 To sustain it for <strong>${months} months</strong>, you'd need an initial fund of <strong>₹${requiredInvestment.toFixed(0)}</strong>.</li>
+  </ul>
+
+  <h4>📉 Inflation Impact</h4>
+  <p>₹${initialInvestment.toFixed(0)} today = ₹${inflationAdjusted.toFixed(0)} after ${months} months (at 6% annual inflation)</p>
+
+  <h3>🌐 Total Portfolio Value: ₹${totalValue.toFixed(2)}</h3>
+`;
+
 
       document.getElementById('details').innerHTML = `
         <h3>Month-by-Month Breakdown (First ${months} Months)</h3>
