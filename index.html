@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>STP Calculator</title>
   <style>
     body {
@@ -103,12 +103,11 @@
       const sipReturn = parseFloat(document.getElementById('sipReturn').value) / 100;
 
       const monthlyLiquidRate = liquidReturn / 12;
-      const monthlySIPRate = sipReturn / 12;
 
       let liquidFund = initialInvestment;
       let sipValue = 0;
       let liquidInterestEarned = 0;
-      let sipGain = 0;
+      let sipInvested = 0;
       let tableRows = "";
 
       // Calculate how many months the fund can sustain the SIP
@@ -122,11 +121,18 @@
         monthsAvailable++;
       }
 
+      // SIP Value growth with yearly compounding
       for (let i = 1; i <= months && i <= 240; i++) {
         const interest = liquidFund * monthlyLiquidRate;
         liquidFund += interest - monthlyTransfer;
         liquidInterestEarned += interest;
-        sipValue = (sipValue + monthlyTransfer) * (1 + monthlySIPRate);
+
+        sipValue += monthlyTransfer;
+        sipInvested += monthlyTransfer;
+
+        if (i % 12 === 0) {
+          sipValue *= (1 + sipReturn); // yearly compounding
+        }
 
         tableRows += `<tr>
           <td>${i}</td>
@@ -136,17 +142,21 @@
         </tr>`;
       }
 
-      sipGain = sipValue - (monthlyTransfer * months);
+      const sipGain = sipValue - sipInvested;
       const totalValue = liquidFund + sipValue;
+      const inflationRate = 0.06;
+      const inflationAdjustedAmount = initialInvestment * Math.pow(1 + inflationRate, months / 12);
 
       document.getElementById('result').innerHTML = `
         <strong>Results after ${months} months:</strong><br>
         💰 Final Liquid Fund Balance: ₹${liquidFund.toFixed(2)}<br>
         💸 Total Interest Earned from Liquid Fund: ₹${liquidInterestEarned.toFixed(2)}<br>
         💳 Final SIP Value: ₹${sipValue.toFixed(2)}<br>
+        💰 SIP Invested: ₹${sipInvested.toFixed(2)}<br>
         💵 SIP Gain: ₹${sipGain.toFixed(2)}<br>
         💡 Based on ₹${monthlyTransfer.toFixed(0)} SIP, your liquid fund can sustain for approximately <strong>${monthsAvailable} months</strong> at ${(liquidReturn * 100).toFixed(2)}% annual return.<br>
         💡 To sustain a ₹${monthlyTransfer.toFixed(0)} SIP for ${months} months at ${(liquidReturn * 100).toFixed(2)}% annual return, you would need an initial investment of approximately ₹${calculateRequiredInvestment(monthlyTransfer, months, monthlyLiquidRate).toFixed(0)}.<br>
+        📉 Due to 6% annual inflation, ₹${initialInvestment.toFixed(0)} today will be equivalent to ₹${inflationAdjustedAmount.toFixed(0)} after ${months} months.<br>
         <hr>
         🌐 <strong>Total Portfolio Value: ₹${totalValue.toFixed(2)}</strong>
       `;
