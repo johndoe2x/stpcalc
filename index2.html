@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>STP Tracker - Modern UI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+</head>
+<body class="bg-gray-100 text-gray-900 min-h-screen font-sans transition-colors duration-300">
+  <header class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-6 shadow-lg">
+    <h1 class="text-3xl md:text-4xl font-bold text-center">Smart SIP Strategy & Investment Tracker</h1>
+  </header>
+
+  <main class="container mx-auto p-6">
+    <div class="flex justify-end mb-4">
+      <label class="flex items-center space-x-2 cursor-pointer">
+        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">🌙 Dark Mode</span>
+        <input type="checkbox" id="themeToggle" class="sr-only">
+        <div class="relative w-10 h-5 bg-gray-300 rounded-full transition-colors duration-300 toggle-switch">
+          <div class="absolute w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300 toggle-knob"></div>
+        </div>
+      </label>
+    </div>
+
+    <div class="tabs flex border-b-2 border-gray-200 mb-6">
+      <button class="tab-button active px-6 py-3 text-lg font-semibold text-gray-700 bg-white rounded-t-lg transition-colors duration-200 dark:text-gray-200 dark:bg-gray-800" onclick="showTab('tab1')">🧮 STP Calculator</button>
+      <button class="tab-button px-6 py-3 text-lg font-semibold text-gray-700 bg-gray-100 rounded-t-lg transition-colors duration-200 dark:text-gray-200 dark:bg-gray-700" onclick="showTab('tab2')">📊 Portfolio Tracker</button>
+    </div>
+
+    <div id="tab1" class="tab-content">
+      <div class="bg-white p-6 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300 dark:bg-gray-800">
+        <h2 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">🧮 STP Investment Calculator</h2>
+        <div class="space-y-4">
+          <div>
+            <label for="initialInvestment" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Initial Investment in Liquid Fund (₹)</label>
+            <input type="number" id="initialInvestment" value="3000000" class="w-full p-2 border rounded-lg bg-white border-gray-300 focus:ring-2 focus:ring-blue-500 transition text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+          </div>
+          <div>
+            <label for="liquidReturn" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Annual Return from Liquid Fund (%)</label>
+            <input type="number" id="liquidReturn" step="0.01" value="6.25" class="w-full p-2 border rounded-lg bg-white border-gray-300 focus:ring-2 focus:ring-blue-500 transition text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+          </div>
+          <div>
+            <label for="monthlyTransfer" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Monthly Transfer to SIP (₹)</label>
+            <input type="number" id="monthlyTransfer" value="15000" class="w-full p-2 border rounded-lg bg-white border-gray-300 focus:ring-2 focus:ring-blue-500 transition text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+          </div>
+          <div>
+            <label for="months" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Number of Months for Transfer</label>
+            <input type="number" id="months" value="180" class="w-full p-2 border rounded-lg bg-white border-gray-300 focus:ring-2 focus:ring-blue-500 transition text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+          </div>
+          <div>
+            <label for="sipReturn" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Annual Return on SIP (%)</label>
+            <input type="number" id="sipReturn" step="0.01" value="15" class="w-full p-2 border rounded-lg bg-white border-gray-300 focus:ring-2 focus:ring-blue-500 transition text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+          </div>
+          <button onclick="calculateSTP()" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors dark:hover:bg-blue-500">Calculate</button>
+        </div>
+      </div>
+
+      <div class="mt-6 space-y-6" id="result"></div>
+
+      <div class="mt-6 bg-white p-6 rounded-lg shadow-lg dark:bg-gray-800">
+        <h3 class="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Month-by-Month Breakdown</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-blue-600 text-white">
+                <th class="p-3">Month</th>
+                <th class="p-3">Interest Earned</th>
+                <th class="p-3">Liquid Fund Balance</th>
+                <th class="p-3">SIP Value</th>
+              </tr>
+            </thead>
+            <tbody id="detailsTable" class="text-gray-900 dark:text-gray-100"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab2" class="tab-content hidden">
+      <div class="bg-white p-6 rounded-lg shadow-lg dark:bg-gray-800">
+        <h2 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">📊 Portfolio Tracker</h2>
+        <p class="text-sm mb-4 text-gray-600 dark:text-gray-400">Upload your holdings CSV to visualize investment vs current value.</p>
+        <input type="file" id="csvUpload" accept=".csv" class="mb-4 text-gray-900 dark:text-gray-100 file:bg-blue-600 file:text-white file:border-none file:rounded file:px-4 file:py-2 file:hover:bg-blue-700 dark:file:hover:bg-blue-500">
+        <div id="portfolioTable" class="overflow-x-auto"></div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Dark Mode Toggle with Local Storage
+    const themeToggle = document.getElementById('themeToggle');
+    const toggleKnob = document.querySelector('.toggle-knob');
+    const toggleSwitch = document.querySelector('.toggle-switch');
+
+    // Default to light mode on load
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    if (savedTheme === 'dark') {
+      document.body.classList.add('dark');
+      themeToggle.checked = true;
+      toggleKnob.style.transform = 'translateX(100%)';
+      toggleSwitch.style.backgroundColor = '#4b6cb7';
+    }
+
+    themeToggle.addEventListener('change', () => {
+      document.body.classList.toggle('dark');
+      const isDark = document.body.classList.contains('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      toggleKnob.style.transform = isDark ? 'translateX(100%)' : 'translateX(0)';
+      toggleSwitch.style.backgroundColor = isDark ? '#4b6cb7' : '#d1d5db';
+    });
+
+    function showTab(id) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.toggle('hidden', tab.id !== id));
+      document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('onclick').includes(id));
+        btn.classList.toggle('bg-white', btn.getAttribute('onclick').includes(id));
+        btn.classList.toggle('dark:bg-gray-800', btn.getAttribute('onclick').includes(id));
+        btn.classList.toggle('bg-gray-100', !btn.getAttribute('onclick').includes(id));
+        btn.classList.toggle('dark:bg-gray-700', !btn.getAttribute('onclick').includes(id));
+      });
+    }
+
+    function animateCounter(elementId, start, end, duration) {
+      let startTimestamp = null;
+      const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        const value = Math.floor(progress * (end - start) + start);
+        document.getElementById(elementId).textContent = `₹${value.toLocaleString('en-IN')}`;
+        if (progress < 1) window.requestAnimationFrame(step);
+      };
+      window.requestAnimationFrame(step);
+    }
+
+    function calculateSTP() {
+      const initialInvestment = parseFloat(document.getElementById('initialInvestment').value);
+      const liquidReturn = parseFloat(document.getElementById('liquidReturn').value) / 100;
+      const monthlyTransfer = parseFloat(document.getElementById('monthlyTransfer').value);
+      const months = parseInt(document.getElementById('months').value);
+      const sipReturn = parseFloat(document.getElementById('sipReturn').value) / 100;
+
+      const monthlyLiquidRate = liquidReturn / 12;
+      const monthlySIPRate = sipReturn / 12;
+
+      let liquidFund = initialInvestment;
+      let sipValue = 0;
+      let totalInvested = 0;
+      let tableRows = '';
+
+      for (let i = 1; i <= months; i++) {
+        const interest = liquidFund * monthlyLiquidRate;
+        liquidFund += interest - monthlyTransfer;
+        totalInvested += monthlyTransfer;
+        sipValue = (sipValue + monthlyTransfer) * (1 + monthlySIPRate);
+
+        tableRows += `<tr class="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+          <td class="p-3 border-b border-gray-200 dark:border-gray-700">${i}</td>
+          <td class="p-3 border-b border-gray-200 dark:border-gray-700">₹${interest.toFixed(2)}</td>
+          <td class="p-3 border-b border-gray-200 dark:border-gray-700">₹${liquidFund.toFixed(2)}</td>
+          <td class="p-3 border-b border-gray-200 dark:border-gray-700">₹${sipValue.toFixed(2)}</td>
+        </tr>`;
+      }
+
+      const sipGain = sipValue - totalInvested;
+      const totalValue = liquidFund + sipValue;
+      const interestEarned = liquidFund - initialInvestment;
+      const monthsAvailable = calculateMonthsAvailable(initialInvestment, monthlyTransfer, monthlyLiquidRate);
+      const requiredInvestment = calculateRequiredInvestment(monthlyTransfer, months, monthlyLiquidRate);
+      const inflationAdjusted = initialInvestment * Math.pow(1 + 0.06, months / 12);
+
+      // Debug: Log inputs and requiredInvestment
+      console.log('Inputs:', { monthlyTransfer, months, monthlyLiquidRate });
+      console.log('Required Investment:', requiredInvestment.toFixed(2));
+
+      // Alternative closed-form calculation (for comparison, commented out)
+      // const requiredInvestmentAlt = monthlyTransfer * (1 - Math.pow(1 + monthlyLiquidRate, -months)) / monthlyLiquidRate;
+      // console.log('Required Investment (Closed-Form):', requiredInvestmentAlt.toFixed(2));
+
+      // STP Calculation Summary with Animated Counters and Emojis
+      document.getElementById('result').innerHTML = `
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+          <h3 class="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">✅ STP Calculation Summary (After ${months} Months)</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+              <h4 class="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">🏦 Liquid Fund Performance</h4>
+              <div class="space-y-2">
+                <p class="text-sm text-gray-600 dark:text-gray-400">🏦 Final Balance</p>
+                <p class="text-2xl font-bold text-blue-600 dark:text-blue-400" id="summaryLiquidBalance">₹0</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">💰 Total Interest Earned</p>
+                <p class="text-2xl font-bold text-blue-600 dark:text-blue-400" id="summaryInterestEarned">₹0</p>
+              </div>
+            </div>
+            <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+              <h4 class="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">📈 SIP Performance</h4>
+              <div class="space-y-2">
+                <p class="text-sm text-gray-600 dark:text-gray-400">💸 Total Invested via SIP</p>
+                <p class="text-2xl font-bold text-green-600 dark:text-green-400" id="summaryTotalInvested">₹0</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">📈 Final SIP Value</p>
+                <p class="text-2xl font-bold text-green-600 dark:text-green-400" id="summarySipValue">₹0</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">🚀 SIP Gain</p>
+                <p class="text-2xl font-bold text-green-600 dark:text-green-400" id="summarySipGain">₹0</p>
+              </div>
+            </div>
+          </div>
+          <div class="mt-6 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+            <h4 class="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">🔍 Strategic Insights</h4>
+            <p class="text-sm text-gray-600 dark:text-gray-400">⏳ Your ₹${monthlyTransfer.toLocaleString('en-IN')} SIP can be sustained for <span class="font-bold">${monthsAvailable}</span> months at <span class="font-bold">${(liquidReturn * 100).toFixed(2)}%</span> annual return.</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">🧮 To sustain it for <span class="font-bold">${months}</span> months, you'd need an initial fund of <span class="font-bold" id="summaryRequiredInvestment">₹0</span>.</p>
+          </div>
+          <div class="mt-6 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+            <h4 class="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">📉 Inflation Impact</h4>
+            <p class="text-sm text-gray-600 dark:text-gray-400">📉 ₹${initialInvestment.toLocaleString('en-IN')} today = <span class="font-bold" id="summaryInflationAdjusted">₹0</span> after ${months} months (at 6% annual inflation)</p>
+          </div>
+          <div class="mt-6 text-center">
+            <h4 class="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">🌐 Total Portfolio Value</h4>
+            <p class="text-3xl font-bold text-purple-600 dark:text-purple-400" id="summaryTotalValue">₹0</p>
+          </div>
+        </div>
+      `;
+
+      // Animate Summary Counters
+      animateCounter('summaryLiquidBalance', 0, liquidFund, 1000);
+      animateCounter('summaryInterestEarned', 0, interestEarned, 1000);
+      animateCounter('summaryTotalInvested', 0, totalInvested, 1000);
+      animateCounter('summarySipValue', 0, sipValue, 1000);
+      animateCounter('summarySipGain', 0, sipGain, 1000);
+      animateCounter('summaryRequiredInvestment', 0, requiredInvestment, 1000);
+      animateCounter('summaryInflationAdjusted', 0, inflationAdjusted, 1000);
+      animateCounter('summaryTotalValue', 0, totalValue, 1000);
+
+      // Month-by-Month Table
+      document.getElementById('detailsTable').innerHTML = tableRows;
+    }
+
+    function calculateMonthsAvailable(initial, sip, rate) {
+      let balance = initial, months = 0;
+      while (balance > 0 && months < 240) {
+        const interest = balance * rate;
+        balance += interest - sip;
+        if (balance < 0) break;
+        months++;
+      }
+      return months;
+    }
+
+    function calculateRequiredInvestment(sip, months, rate) {
+      let required = 0;
+      for (let i = 0; i < months; i++) {
+        required = (required + sip) / (1 + rate);
+      }
+      return required;
+    }
+
+    document.getElementById('csvUpload').addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: function (results) {
+          const data = results.data;
+          const netChgPercents = data.map(row => {
+            const keys = Object.keys(row);
+            const matchKey = keys.find(k => k.toLowerCase().includes('net chg') && k.includes('%'));
+            if (!matchKey) return NaN;
+            const raw = row[matchKey];
+            if (!raw) return NaN;
+            const cleaned = String(raw).replace(/[^0-9.-]/g, '');
+            const parsed = parseFloat(cleaned);
+            return isNaN(parsed) ? NaN : parsed;
+          }).filter(val => !isNaN(val));
+          const avgNetChg = netChgPercents.length > 0 ? (netChgPercents.reduce((a, b) => a + b, 0) / netChgPercents.length).toFixed(2) : '0.00';
+
+          let tableHTML = `<table class="w-full text-left border-collapse text-gray-900 dark:text-gray-100">
+            <thead>
+              <tr class="bg-blue-600 text-white">
+                <th class="p-3 cursor-pointer" onclick="sortTableByColumn(0)">Instrument</th>
+                <th class="p-3 cursor-pointer" onclick="sortTableByColumn(1)">Qty.</th>
+                <th class="p-3 cursor-pointer" onclick="sortTableByColumn(2)">Avg. cost</th>
+                <th class="p-3 cursor-pointer" onclick="sortTableByColumn(3)">LTP</th>
+                <th class="p-3 cursor-pointer" onclick="sortTableByColumn(4)">Invested</th>
+                <th class="p-3 cursor-pointer" onclick="sortTableByColumn(5)">Cur. val</th>
+                <th class="p-3 cursor-pointer" onclick="sortTableByColumn(6)">P&L</th>
+                <th class="p-3 cursor-pointer" onclick="sortTableByColumn(7)">Net chg.</th>
+                <th class="p-3">Action</th>
+              </tr>
+            </thead>
+            <tbody>`;
+
+          data.forEach((row) => {
+            tableHTML += `<tr class="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+              <td class="p-3 border-b border-gray-200 dark:border-gray-700">${row['Instrument'] || ''}</td>
+              <td class="p-3 border-b border-gray-200 dark:border-gray-700">${row['Qty.'] || ''}</td>
+              <td class="p-3 border-b border-gray-200 dark:border-gray-700">${row['Avg. cost'] || ''}</td>
+              <td class="p-3 border-b border-gray-200 dark:border-gray-700">${row['LTP'] || ''}</td>
+              <td class="p-3 border-b border-gray-200 dark:border-gray-700">${row['Invested'] || ''}</td>
+              <td class="p-3 border-b border-gray-200 dark:border-gray-700">${row['Cur. val'] || ''}</td>
+              <td class="p-3 border-b border-gray-200 dark:border-gray-700">${row['P&L'] || ''}</td>
+              <td class="p-3 border-b border-gray-200 dark:border-gray-700">${row['Net chg. %'] || row['Net chg.%'] || row['Net chg.'] || ''}</td>
+              <td class="p-3 border-b border-gray-200 dark:border-gray-700 text-center">
+                <button onclick="deleteRow(this)" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 dark:hover:bg-red-400 transition">Delete</button>
+              </td>
+            </tr>`;
+          });
+
+          const totalInvested = data.reduce((sum, row) => sum + (parseFloat(row['Invested']) || 0), 0).toFixed(2);
+          const totalCurrent = data.reduce((sum, row) => sum + (parseFloat(row['Cur. val']) || 0), 0).toFixed(2);
+          const totalPL = data.reduce((sum, row) => sum + (parseFloat(row['P&L']) || 0), 0).toFixed(2);
+          const avgGain = totalInvested > 0 ? ((totalPL / totalInvested) * 100).toFixed(2) : '0.00';
+
+          tableHTML += `</tbody>
+            <tfoot>
+              <tr class="font-bold bg-gray-50 dark:bg-gray-800">
+                <td colspan="4" class="p-3 border-t border-gray-200 dark:border-gray-700 text-right">Total:</td>
+                <td class="p-3 border-t border-gray-200 dark:border-gray-700">₹${totalInvested}</td>
+                <td class="p-3 border-t border-gray-200 dark:border-gray-700">₹${totalCurrent}</td>
+                <td class="p-3 border-t border-gray-200 dark:border-gray-700">₹${totalPL}</td>
+                <td class="p-3 border-t border-gray-200 dark:border-gray-700">${avgNetChg}%</td>
+                <td class="p-3 border-t border-gray-200 dark:border-gray-700">Avg Gain: ${avgGain}%</td>
+              </tr>
+            </tfoot>
+          </table>`;
+          document.getElementById('portfolioTable').innerHTML = tableHTML;
+        }
+      });
+    });
+
+    function deleteRow(button) {
+      const row = button.closest('tr');
+      row.remove();
+      const rows = [...document.querySelectorAll('#portfolioTable tbody tr')];
+      const data = rows.map(row => {
+        const cells = row.querySelectorAll('td');
+        return {
+          Invested: parseFloat(cells[4]?.innerText.replace(/[^0-9.-]/g, '') || 0),
+          Current: parseFloat(cells[5]?.innerText.replace(/[^0-9.-]/g, '') || 0),
+          PL: parseFloat(cells[6]?.innerText.replace(/[^0-9.-]/g, '') || 0),
+          NetChg: parseFloat(cells[7]?.innerText.replace(/[^0-9.-]/g, '') || 0)
+        };
+      });
+
+      const totalInvested = data.reduce((sum, r) => sum + r.Invested, 0).toFixed(2);
+      const totalCurrent = data.reduce((sum, r) => sum + r.Current, 0).toFixed(2);
+      const totalPL = data.reduce((sum, r) => sum + r.PL, 0).toFixed(2);
+      const avgNetChg = data.length ? (data.reduce((sum, r) => sum + r.NetChg, 0) / data.length).toFixed(2) : '0.00';
+
+      const tfoot = document.querySelector('#portfolioTable tfoot');
+      if (tfoot) {
+        tfoot.innerHTML = `<tr class="font-bold bg-gray-50 dark:bg-gray-800">
+          <td colspan="4" class="p-3 border-t border-gray-200 dark:border-gray-700 text-right">Total:</td>
+          <td class="p-3 border-t border-gray-200 dark:border-gray-700">₹${totalInvested}</td>
+          <td class="p-3 border-t border-gray-200 dark:border-gray-700">₹${totalCurrent}</td>
+          <td class="p-3 border-t border-gray-200 dark:border-gray-700">₹${totalPL}</td>
+          <td class="p-3 border-t border-gray-200 dark:border-gray-700">${avgNetChg}%</td>
+          <td class="p-3 border-t border-gray-200 dark:border-gray-700"></td>
+        </tr>`;
+      }
+    }
+
+    function sortTableByColumn(colIndex) {
+      const tbody = document.querySelector('#portfolioTable tbody');
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      const currentSorted = tbody.getAttribute('data-sorted') == colIndex;
+      const ascending = !currentSorted;
+      tbody.setAttribute('data-sorted', ascending ? colIndex : '');
+      rows.sort((a, b) => {
+        const aText = a.children[colIndex].innerText.replace(/[^0-9.-]/g, '').trim();
+        const bText = b.children[colIndex].innerText.replace(/[^0-9.-]/g, '').trim();
+        const aVal = isNaN(aText) ? aText.toLowerCase() : parseFloat(aText);
+        const bVal = isNaN(bText) ? bText.toLowerCase() : parseFloat(bText);
+        if (aVal < bVal) return ascending ? -1 : 1;
+        if (aVal > bVal) return ascending ? 1 : -1;
+        return 0;
+      });
+      rows.forEach(row => tbody.appendChild(row));
+    }
+  </script>
+
+  <style>
+    /* Custom styles for toggle switch */
+    #themeToggle:checked + .toggle-switch .toggle-knob {
+      transform: translateX(100%);
+    }
+    #themeToggle:checked + .toggle-switch {
+      background-color: #4b6cb7;
+    }
+    .tab-button.active {
+      border-bottom: 2px solid #3b82f6;
+    }
+  </style>
+</body>
+</html>
