@@ -5,30 +5,55 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>STP Calculator</title>
   <style>
+    :root {
+      --bg-color: #f4f7f9;
+      --text-color: #000;
+      --card-bg: #fff;
+      --border-color: #ccc;
+      --button-bg: #007bff;
+      --button-hover: #0056b3;
+    }
+
+    body.dark {
+      --bg-color: #121212;
+      --text-color: #eee;
+      --card-bg: #1e1e1e;
+      --border-color: #333;
+      --button-bg: #0d6efd;
+      --button-hover: #003f88;
+    }
+
     body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
       font-family: Arial, sans-serif;
-      background-color: #f4f7f9;
       padding: 20px;
       max-width: 800px;
       margin: auto;
+      transition: background 0.3s, color 0.3s;
     }
+
     h1 {
       text-align: center;
-      color: #333;
     }
+
     label {
       display: block;
       margin-top: 15px;
     }
-    input {
+
+    input, select {
       width: 100%;
       padding: 10px;
       margin-top: 5px;
-      border: 1px solid #ccc;
+      border: 1px solid var(--border-color);
       border-radius: 5px;
+      background-color: var(--card-bg);
+      color: var(--text-color);
     }
+
     button {
-      background-color: #007bff;
+      background-color: var(--button-bg);
       color: white;
       border: none;
       padding: 10px 20px;
@@ -36,58 +61,88 @@
       width: 100%;
       border-radius: 5px;
       font-size: 16px;
+      cursor: pointer;
     }
+
     button:hover {
-      background-color: #0056b3;
+      background-color: var(--button-hover);
     }
+
     .result, .details, .suggestion {
       margin-top: 20px;
       padding: 15px;
-      background-color: #fff;
-      border: 1px solid #ddd;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
       border-radius: 5px;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 15px;
     }
+
     th, td {
-      border: 1px solid #ccc;
+      border: 1px solid var(--border-color);
       padding: 8px;
       text-align: center;
     }
+
     th {
-      background-color: #e9ecef;
+      background-color: var(--button-bg);
+      color: white;
+    }
+
+    .toggle-container {
+      text-align: right;
+      margin-bottom: 10px;
+    }
+
+    .toggle-container label {
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .toggle-container input {
+      width: auto;
+      margin-right: 5px;
     }
   </style>
 </head>
 <body>
+  <div class="toggle-container">
+    <label>
+      <input type="checkbox" id="themeToggle" onchange="toggleTheme()"> 🌙 Dark Mode
+    </label>
+  </div>
+
   <h1>STP Investment Calculator</h1>
 
-<label for="initialInvestment">Initial Investment in Liquid Fund (₹):</label>
-<input type="number" id="initialInvestment" value="3000000">
+  <label for="initialInvestment">Initial Investment in Liquid Fund (₹):</label>
+  <input type="number" id="initialInvestment" value="3000000">
 
-<label for="liquidReturn">Annual Return from Liquid Fund (%):</label>
-<input type="number" id="liquidReturn" step="0.01" value="6.25">
+  <label for="liquidReturn">Annual Return from Liquid Fund (%):</label>
+  <input type="number" id="liquidReturn" step="0.01" value="6.25">
 
-<label for="monthlyTransfer">Monthly Transfer to SIP (₹):</label>
-<input type="number" id="monthlyTransfer" value="15000">
+  <label for="monthlyTransfer">Monthly Transfer to SIP (₹):</label>
+  <input type="number" id="monthlyTransfer" value="15000">
 
-<label for="months">Number of Months for Transfer:</label>
-<input type="number" id="months" value="12">
+  <label for="months">Number of Months for Transfer:</label>
+  <input type="number" id="months" value="180">
 
-<label for="sipReturn">Annual Return on SIP (%):</label>
-<input type="number" id="sipReturn" step="0.01" value="15">
-
+  <label for="sipReturn">Annual Return on SIP (%):</label>
+  <input type="number" id="sipReturn" step="0.01" value="15">
 
   <button onclick="calculateSTP()">Calculate</button>
 
   <div class="result" id="result"></div>
-  <div class="suggestion" id="suggestion"></div>
   <div class="details" id="details"></div>
 
   <script>
+    function toggleTheme() {
+      document.body.classList.toggle("dark");
+    }
+
     function calculateRequiredInvestment(monthlyTransfer, months, monthlyRate) {
       let required = 0;
       for (let i = 0; i < months; i++) {
@@ -111,7 +166,7 @@
       let sipInvested = 0;
       let tableRows = "";
 
-      // Calculate how many months the fund can sustain the SIP
+      // SIP sustainability calculation
       let balance = initialInvestment;
       let monthsAvailable = 0;
       const maxIterations = 240;
@@ -122,7 +177,7 @@
         monthsAvailable++;
       }
 
-      // SIP Value growth with yearly compounding
+      // SIP calculation with yearly compounding
       for (let i = 1; i <= months && i <= 240; i++) {
         const interest = liquidFund * monthlyLiquidRate;
         liquidFund += interest - monthlyTransfer;
@@ -132,7 +187,7 @@
         sipInvested += monthlyTransfer;
 
         if (i % 12 === 0) {
-          sipValue *= (1 + sipReturn); // yearly compounding
+          sipValue *= (1 + sipReturn); // apply yearly interest
         }
 
         tableRows += `<tr>
