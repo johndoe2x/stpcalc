@@ -3,9 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>STP Calculator</title>
+  <title>STP Tracker - Tab Layout</title>
   <style>
     :root {
+  --table-row-light: white;
+  --table-row-alt: #f0f8ff;
       --bg-color: #f4f7f9;
       --text-color: #000;
       --card-bg: #fff;
@@ -15,6 +17,8 @@
     }
 
     body.dark {
+  --table-row-light: #1e1e1e;
+  --table-row-alt: #2a2a2a;
       --bg-color: #121212;
       --text-color: #eee;
       --card-bg: #1e1e1e;
@@ -24,28 +28,65 @@
     }
 
     body {
+      font-family: Arial, sans-serif;
       background-color: var(--bg-color);
       color: var(--text-color);
-      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .tab-container {
+      max-width: 1000px;
+      margin: 0 auto;
       padding: 20px;
-      max-width: 800px;
-      margin: auto;
-      transition: background 0.3s, color 0.3s;
     }
 
-    h1 {
-      text-align: center;
+    .tabs {
+      display: flex;
+      margin-bottom: 10px;
+      border-bottom: 2px solid #ccc;
     }
 
-    label {
+    .tab-button {
+      background: #e6f0ff;
+      color: black;
+      border: none;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+
+    .tab-button.active {
+      background: var(--button-bg);
+      color: white;
+    }
+
+    .tab-content {
+      display: none;
+      background: var(--card-bg);
+      padding: 20px;
+      border: 1px solid var(--border-color);
+    }
+
+    .tab-content.active {
       display: block;
-      margin-top: 15px;
     }
 
-    input, select {
+    .result, .details {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
+    }
+
+    input, label, button {
+      display: block;
       width: 100%;
+      margin-top: 10px;
+    }
+
+    input {
       padding: 10px;
-      margin-top: 5px;
       border: 1px solid var(--border-color);
       border-radius: 5px;
       background-color: var(--card-bg);
@@ -56,99 +97,72 @@
       background-color: var(--button-bg);
       color: white;
       border: none;
-      padding: 10px 20px;
-      margin-top: 20px;
-      width: 100%;
+      padding: 10px;
       border-radius: 5px;
-      font-size: 16px;
+      margin-top: 20px;
       cursor: pointer;
     }
 
     button:hover {
       background-color: var(--button-hover);
     }
-
-    .result, .details, .suggestion {
-      margin-top: 20px;
-      padding: 15px;
-      background-color: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 5px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-
-    th, td {
-      border: 1px solid var(--border-color);
-      padding: 8px;
-      text-align: center;
-    }
-
-    th {
-      background-color: var(--button-bg);
-      color: white;
-    }
-
-    .toggle-container {
-      text-align: right;
-      margin-bottom: 10px;
-    }
-
-    .toggle-container label {
-      font-size: 14px;
-      cursor: pointer;
-    }
-
-    .toggle-container input {
-      width: auto;
-      margin-right: 5px;
-    }
   </style>
 </head>
 <body>
-  <div class="toggle-container">
-    <label>
-      <input type="checkbox" id="themeToggle" onchange="toggleTheme()"> 🌙 Dark Mode
-    </label>
+  <h1 style="text-align: center; padding: 10px 0 5px 0; font-size: 28px; color: var(--text-color);">
+    Smart SIP Strategy & Investment Tracker
+  </h1>
+  <div class="tab-container">
+    <div class="tabs">
+      <button class="tab-button active" onclick="showTab('tab1')">🧮 STP Calculator</button>
+      <button class="tab-button" onclick="showTab('tab2')">📊 Portfolio Tracker</button>
+      </div>
+
+    <div id="tab1" class="tab-content active">
+      <div class="toggle-container">
+        <label><input type="checkbox" id="themeToggle" onchange="document.body.classList.toggle('dark')"> 🌙 Dark Mode</label>
+      </div>
+
+      <h2>🧮 STP Investment Calculator</h2>
+
+      <label for="initialInvestment">Initial Investment in Liquid Fund (₹):</label>
+      <input type="number" id="initialInvestment" value="3000000">
+
+      <label for="liquidReturn">Annual Return from Liquid Fund (%):</label>
+      <input type="number" id="liquidReturn" step="0.01" value="6.25">
+
+      <label for="monthlyTransfer">Monthly Transfer to SIP (₹):</label>
+      <input type="number" id="monthlyTransfer" value="15000">
+
+      <label for="months">Number of Months for Transfer:</label>
+      <input type="number" id="months" value="180">
+
+      <label for="sipReturn">Annual Return on SIP (%):</label>
+      <input type="number" id="sipReturn" step="0.01" value="15">
+
+      <button onclick="calculateSTP()">Calculate</button>
+
+      <div class="result" id="result"></div>
+      <div class="details" id="details"></div>
+    </div>
+
+    <div id="tab2" class="tab-content" style="color: var(--text-color);">
+      <h2>📊 Portfolio Tracker</h2>
+      <p style="margin-top: 5px; font-size: 15px;">View live or imported portfolio. Load your holdings CSV to visualize investment vs current value.</p>
+      <input type="file" id="csvUpload" accept=".csv">
+      
+<div id="portfolioTable" class="details"></div>
+    </div>
+
+    
   </div>
 
-  <h1>STP Investment Calculator</h1>
-
-  <label for="initialInvestment">Initial Investment in Liquid Fund (₹):</label>
-  <input type="number" id="initialInvestment" value="3000000">
-
-  <label for="liquidReturn">Annual Return from Liquid Fund (%):</label>
-  <input type="number" id="liquidReturn" step="0.01" value="6.25">
-
-  <label for="monthlyTransfer">Monthly Transfer to SIP (₹):</label>
-  <input type="number" id="monthlyTransfer" value="15000">
-
-  <label for="months">Number of Months for Transfer:</label>
-  <input type="number" id="months" value="180">
-
-  <label for="sipReturn">Annual Return on SIP (%):</label>
-  <input type="number" id="sipReturn" step="0.01" value="15">
-
-  <button onclick="calculateSTP()">Calculate</button>
-
-  <div class="result" id="result"></div>
-  <div class="details" id="details"></div>
-
   <script>
-    function toggleTheme() {
-      document.body.classList.toggle("dark");
-    }
-
-    function calculateRequiredInvestment(monthlyTransfer, months, monthlyRate) {
-      let required = 0;
-      for (let i = 0; i < months; i++) {
-        required = (required + monthlyTransfer) / (1 + monthlyRate);
-      }
-      return required;
+    function showTab(id) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelector(`[onclick="showTab('${id}')"]`).classList.add('active');
     }
 
     function calculateSTP() {
@@ -159,77 +173,218 @@
       const sipReturn = parseFloat(document.getElementById('sipReturn').value) / 100;
 
       const monthlyLiquidRate = liquidReturn / 12;
+      const monthlySIPRate = sipReturn / 12;
 
       let liquidFund = initialInvestment;
       let sipValue = 0;
-      let liquidInterestEarned = 0;
-      let sipInvested = 0;
-      let tableRows = "";
+      let totalInvested = 0;
+      let tableRows = '';
 
-      // SIP sustainability calculation
-      let balance = initialInvestment;
-      let monthsAvailable = 0;
-      const maxIterations = 240;
-      while (balance > 0 && monthsAvailable < maxIterations) {
-        const interest = balance * monthlyLiquidRate;
-        balance += interest - monthlyTransfer;
-        if (balance < 0) break;
-        monthsAvailable++;
-      }
-
-      // SIP calculation with yearly compounding
-      for (let i = 1; i <= months && i <= 240; i++) {
+      for (let i = 1; i <= months; i++) {
         const interest = liquidFund * monthlyLiquidRate;
         liquidFund += interest - monthlyTransfer;
-        liquidInterestEarned += interest;
+        totalInvested += monthlyTransfer;
+        sipValue = (sipValue + monthlyTransfer) * (1 + monthlySIPRate);
 
-        sipValue += monthlyTransfer;
-        sipInvested += monthlyTransfer;
-
-        if (i % 12 === 0) {
-          sipValue *= (1 + sipReturn); // apply yearly interest
-        }
-
-        tableRows += `<tr>
-          <td>${i}</td>
-          <td>₹${interest.toFixed(2)}</td>
-          <td>₹${liquidFund.toFixed(2)}</td>
-          <td>₹${sipValue.toFixed(2)}</td>
+        tableRows += `<tr style="background-color: ${(i % 2 === 0) ? 'var(--table-row-light)' : 'var(--table-row-alt)'}; color: var(--text-color);">
+          <td style='border: 1px solid var(--border-color); padding: 8px;'>${i}</td>
+          <td style='border: 1px solid var(--border-color); padding: 8px;'>₹${interest.toFixed(2)}</td>
+          <td style='border: 1px solid var(--border-color); padding: 8px;'>₹${liquidFund.toFixed(2)}</td>
+          <td style='border: 1px solid var(--border-color); padding: 8px;'>₹${sipValue.toFixed(2)}</td>
         </tr>`;
       }
 
-      const sipGain = sipValue - sipInvested;
+      const sipGain = sipValue - totalInvested;
       const totalValue = liquidFund + sipValue;
-      const inflationRate = 0.06;
-      const inflationAdjustedAmount = initialInvestment * Math.pow(1 + inflationRate, months / 12);
+      const interestEarned = liquidFund - initialInvestment;
+      const monthsAvailable = calculateMonthsAvailable(initialInvestment, monthlyTransfer, monthlyLiquidRate);
+      const requiredInvestment = calculateRequiredInvestment(monthlyTransfer, months, monthlyLiquidRate);
+      const inflationAdjusted = initialInvestment * Math.pow(1 + 0.06, months / 12);
 
       document.getElementById('result').innerHTML = `
         <strong>Results after ${months} months:</strong><br>
         💰 Final Liquid Fund Balance: ₹${liquidFund.toFixed(2)}<br>
-        💸 Total Interest Earned from Liquid Fund: ₹${liquidInterestEarned.toFixed(2)}<br>
+        💸 Total Interest Earned from Liquid Fund: ₹${interestEarned.toFixed(2)}<br>
         💳 Final SIP Value: ₹${sipValue.toFixed(2)}<br>
-        💰 SIP Invested: ₹${sipInvested.toFixed(2)}<br>
+        💰 SIP Invested: ₹${totalInvested.toFixed(2)}<br>
         💵 SIP Gain: ₹${sipGain.toFixed(2)}<br>
-        💡 Based on ₹${monthlyTransfer.toFixed(0)} SIP, your liquid fund can sustain for approximately <strong>${monthsAvailable} months</strong> at ${(liquidReturn * 100).toFixed(2)}% annual return.<br>
-        💡 To sustain a ₹${monthlyTransfer.toFixed(0)} SIP for ${months} months at ${(liquidReturn * 100).toFixed(2)}% annual return, you would need an initial investment of approximately ₹${calculateRequiredInvestment(monthlyTransfer, months, monthlyLiquidRate).toFixed(0)}.<br>
-        📉 Due to 6% annual inflation, ₹${initialInvestment.toFixed(0)} today will be equivalent to ₹${inflationAdjustedAmount.toFixed(0)} after ${months} months.<br>
-        <hr>
+        💡 Based on ₹${monthlyTransfer} SIP, your liquid fund can sustain for approximately ${monthsAvailable} months at ${(liquidReturn * 100).toFixed(2)}% annual return.<br>
+        💡 To sustain a ₹${monthlyTransfer} SIP for ${months} months at ${(liquidReturn * 100).toFixed(2)}% annual return, you would need an initial investment of approximately ₹${requiredInvestment.toFixed(0)}.<br>
+        📉 Due to 6% annual inflation, ₹${initialInvestment.toFixed(0)} today will be equivalent to ₹${inflationAdjusted.toFixed(0)} after ${months} months.<br>
         🌐 <strong>Total Portfolio Value: ₹${totalValue.toFixed(2)}</strong>
       `;
 
       document.getElementById('details').innerHTML = `
-        <h3>Month-by-Month Breakdown (First ${Math.min(months, 240)} Months)</h3>
-        <table>
-          <tr>
-            <th>Month</th>
-            <th>Interest Earned</th>
-            <th>Liquid Fund Balance</th>
-            <th>SIP Value</th>
-          </tr>
-          ${tableRows}
+        <h3>Month-by-Month Breakdown (First ${months} Months)</h3>
+        <table style='width: 100%; border-collapse: collapse; border: 1px solid var(--border-color);'>
+          <thead>
+            <tr style='background-color: var(--button-bg); color: white; border: 1px solid var(--border-color);'>
+              <th style='border: 1px solid var(--border-color); padding: 8px;'>Month</th>
+              <th style='border: 1px solid var(--border-color); padding: 8px;'>Interest Earned</th>
+              <th style='border: 1px solid var(--border-color); padding: 8px;'>Liquid Fund Balance</th>
+              <th style='border: 1px solid var(--border-color); padding: 8px;'>SIP Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRows}
+          </tbody>
         </table>
       `;
     }
-  </script>
+
+    function calculateMonthsAvailable(initial, sip, rate) {
+      let balance = initial, months = 0;
+      while (balance > 0 && months < 240) {
+        const interest = balance * rate;
+        balance += interest - sip;
+        if (balance < 0) break;
+        months++;
+      }
+      return months;
+    }
+
+    function calculateRequiredInvestment(sip, months, rate) {
+      let required = 0;
+      for (let i = 0; i < months; i++) {
+        required = (required + sip) / (1 + rate);
+      }
+      return required;
+    }
+  function sortTableByColumn(colIndex) {
+  const tbody = document.querySelector('#portfolioTable tbody');
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  const currentSorted = tbody.getAttribute('data-sorted') == colIndex;
+  const ascending = !currentSorted;
+  tbody.setAttribute('data-sorted', ascending ? colIndex : '');
+  rows.sort((a, b) => {
+    const aText = a.children[colIndex].innerText.replace(/[^0-9.-]/g, '').trim();
+    const bText = b.children[colIndex].innerText.replace(/[^0-9.-]/g, '').trim();
+    const aVal = isNaN(aText) ? aText.toLowerCase() : parseFloat(aText);
+    const bVal = isNaN(bText) ? bText.toLowerCase() : parseFloat(bText);
+    if (aVal < bVal) return ascending ? -1 : 1;
+    if (aVal > bVal) return ascending ? 1 : -1;
+    return 0;
+  });
+  rows.forEach(row => tbody.appendChild(row));
+}
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+<script>
+  document.getElementById('csvUpload').addEventListener('change', function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: function (results) {
+        const data = results.data;
+        const netChgPercents = data.map(row => {
+  const keys = Object.keys(row);
+  const matchKey = keys.find(k => k.toLowerCase().includes('net chg') && k.includes('%'));
+  if (!matchKey) return NaN;
+  const raw = row[matchKey];
+  if (!raw) return NaN;
+  const cleaned = String(raw).replace(/[^0-9.-]/g, '');
+  const parsed = parseFloat(cleaned);
+  return isNaN(parsed) ? NaN : parsed;
+}).filter(val => !isNaN(val));
+        const avgNetChg = netChgPercents.length > 0 ? (netChgPercents.reduce((a, b) => a + b, 0) / netChgPercents.length).toFixed(2) : '0.00';
+        
+        let tableHTML = `<table style='width: 100%; border-collapse: collapse; border: 1px solid var(--border-color);'>
+          <thead>
+            <tr style='background-color: var(--button-bg); color: white;'>
+              <th style='border: 1px solid var(--border-color); padding: 8px; cursor: pointer;' onclick='sortTableByColumn(0)'>Instrument</th>
+              <th style='border: 1px solid var(--border-color); padding: 8px; cursor: pointer;' onclick='sortTableByColumn(1)'>Qty.</th>
+              <th style='border: 1px solid var(--border-color); padding: 8px; cursor: pointer;' onclick='sortTableByColumn(2)'>Avg. cost</th>
+              <th style='border: 1px solid var(--border-color); padding: 8px; cursor: pointer;' onclick='sortTableByColumn(3)'>LTP</th>
+              <th style='border: 1px solid var(--border-color); padding: 8px; cursor: pointer;' onclick='sortTableByColumn(4)'>Invested</th>
+              <th style='border: 1px solid var(--border-color); padding: 8px; cursor: pointer;' onclick='sortTableByColumn(5)'>Cur. val</th>
+              <th style='border: 1px solid var(--border-color); padding: 8px; cursor: pointer;' onclick='sortTableByColumn(6)'>P&L</th>
+              <th style='border: 1px solid var(--border-color); padding: 8px; cursor: pointer;' onclick='sortTableByColumn(7)'>Net chg.</th>
+            </tr>
+          </thead>
+          <tbody>`;
+
+        data.forEach((row, index) => {
+          tableHTML += `<tr>
+            <td style='border: 1px solid var(--border-color); padding: 8px;'>${row['Instrument'] || ''}</td>
+            <td style='border: 1px solid var(--border-color); padding: 8px;'>${row['Qty.'] || ''}</td>
+            <td style='border: 1px solid var(--border-color); padding: 8px;'>${row['Avg. cost'] || ''}</td>
+            <td style='border: 1px solid var(--border-color); padding: 8px;'>${row['LTP'] || ''}</td>
+            <td style='border: 1px solid var(--border-color); padding: 8px;'>${row['Invested'] || ''}</td>
+            <td style='border: 1px solid var(--border-color); padding: 8px;'>${row['Cur. val'] || ''}</td>
+            <td style='border: 1px solid var(--border-color); padding: 8px;'>${row['P&L'] || ''}</td>
+            <td style='border: 1px solid var(--border-color); padding: 8px;'>${row['Net chg. %'] || row['Net chg.%'] || row['Net chg.'] || ''}</td>
+            <td style='border: 1px solid var(--border-color); padding: 8px; text-align: center;'>
+              <button onclick="deleteRow(this)" style="cursor:pointer; background-color:#dc3545; color:white; border:none; padding:4px 8px; border-radius:4px;">Delete</button>
+            </td>
+          </tr>`;
+        });
+
+        const totalInvested = data.reduce((sum, row) => sum + (parseFloat(row['Invested']) || 0), 0).toFixed(2);
+const totalCurrent = data.reduce((sum, row) => sum + (parseFloat(row['Cur. val']) || 0), 0).toFixed(2);
+const totalPL = data.reduce((sum, row) => sum + (parseFloat(row['P&L']) || 0), 0).toFixed(2);
+const avgGain = ((totalPL / totalInvested) * 100).toFixed(2);
+
+tableHTML += `</tbody>
+<tfoot>
+<tr style='font-weight:bold;'>
+  <td colspan='4' style='border: 1px solid var(--border-color); padding: 8px; text-align:right;'>Total:</td>
+  <td style='border: 1px solid var(--border-color); padding: 8px;'>₹${totalInvested}</td>
+  <td style='border: 1px solid var(--border-color); padding: 8px;'>₹${totalCurrent}</td>
+  <td style='border: 1px solid var(--border-color); padding: 8px;'>₹${totalPL}</td>
+  <td style='border: 1px solid var(--border-color); padding: 8px;'>${avgNetChg}%</td>
+  <td style='border: 1px solid var(--border-color); padding: 8px;'>Avg Gain: ${avgGain}%</td>
+</tr>
+</tfoot></table>`;
+        document.getElementById('portfolioTable').innerHTML = tableHTML;
+      }
+    });
+  });
+function deleteRow(button) {
+  const row = button.closest('tr');
+  row.remove();
+  const rows = [...document.querySelectorAll('#portfolioTable tbody tr')];
+  const data = rows.map(row => {
+    const cells = row.querySelectorAll('td');
+    return {
+      Invested: parseFloat(cells[4]?.innerText.replace(/[^0-9.-]/g, '') || 0),
+      Current: parseFloat(cells[5]?.innerText.replace(/[^0-9.-]/g, '') || 0),
+      PL: parseFloat(cells[6]?.innerText.replace(/[^0-9.-]/g, '') || 0),
+      NetChg: parseFloat(cells[7]?.innerText.replace(/[^0-9.-]/g, '') || 0)
+    };
+  });
+
+  const totalInvested = data.reduce((sum, r) => sum + r.Invested, 0).toFixed(2);
+  const totalCurrent = data.reduce((sum, r) => sum + r.Current, 0).toFixed(2);
+  const totalPL = data.reduce((sum, r) => sum + r.PL, 0).toFixed(2);
+  const avgNetChg = data.length ? (data.reduce((sum, r) => sum + r.NetChg, 0) / data.length).toFixed(2) : '0.00';
+
+  const tfoot = document.querySelector('#portfolioTable tfoot');
+  if (tfoot) {
+    tfoot.innerHTML = `<tr style='font-weight:bold;'>
+      <td colspan='4' style='border: 1px solid var(--border-color); padding: 8px; text-align:right;'>Total:</td>
+      <td style='border: 1px solid var(--border-color); padding: 8px;'>₹${totalInvested}</td>
+      <td style='border: 1px solid var(--border-color); padding: 8px;'>₹${totalCurrent}</td>
+      <td style='border: 1px solid var(--border-color); padding: 8px;'>₹${totalPL}</td>
+      <td style='border: 1px solid var(--border-color); padding: 8px;'>${avgNetChg}%</td>
+      <td></td>
+    </tr>`;
+  }
+}
+function sortPortfolioTable() {
+  const order = document.getElementById('sortSelect').value;
+  const tbody = document.querySelector('#portfolioTable tbody');
+  if (!tbody) return;
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  rows.sort((a, b) => {
+    const aText = a.children[0].innerText.toLowerCase();
+    const bText = b.children[0].innerText.toLowerCase();
+    return order === 'asc' ? aText.localeCompare(bText) : bText.localeCompare(aText);
+  });
+  rows.forEach(row => tbody.appendChild(row));
+}
+</script>
 </body>
 </html>
